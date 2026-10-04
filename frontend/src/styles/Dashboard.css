@@ -1,0 +1,172 @@
+/* Dashboard Layout Styles - Enhanced */
+
+.dashboard-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7ff 0%, #f0f3ff 50%, #fafbff 100%);
+  padding: 32px 24px;
+}
+
+.dashboard-header {
+  background: white;
+  border-radius: 16px;
+  padding: 32px 40px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  animation: slideInDown 0.5s ease;
+}
+
+.dashboard-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.basic-dashboard {
+  background: white;
+  padding: 48px 40px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.basic-dashboard h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.basic-dashboard p {
+  font-size: 16px;
+  color: #999;
+  line-height: 1.6;
+}
+
+/* Animations */
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .dashboard-wrapper {
+    padding: 24px 16px;
+  }
+
+  .dashboard-header {
+    padding: 24px 32px;
+    margin-bottom: 24px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 28px;
+  }
+
+  .basic-dashboard {
+    padding: 36px 32px;
+  }
+
+  .basic-dashboard h2 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-wrapper {
+    padding: 16px 12px;
+  }
+
+  .dashboard-header {
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 22px;
+  }
+
+  .basic-dashboard {
+    padding: 28px 20px;
+  }
+
+  .basic-dashboard h2 {
+    font-size: 20px;
+  }
+
+  .basic-dashboard p {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-wrapper {
+    padding: 12px 8px;
+  }
+
+  .dashboard-header {
+    padding: 16px 16px;
+    margin-bottom: 16px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 18px;
+  }
+
+  .role-badge {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .basic-dashboard {
+    padding: 20px 16px;
+  }
+
+  .basic-dashboard h2 {
+    font-size: 18px;
+  }
+
+  .basic-dashboard p {
+    font-size: 13px;
+  }
+}

@@ -1,0 +1,449 @@
+/* ========================================
+   ROLE-SPECIFIC DASHBOARD STYLES
+   ======================================== */
+
+.role-dashboard {
+  width: 100%;
+  animation: fadeIn 0.5s ease;
+}
+
+.dashboard-top {
+  margin-bottom: 40px;
+}
+
+.greeting {
+  margin-bottom: 24px;
+}
+
+.greeting h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.greeting p {
+  margin: 0;
+  font-size: 16px;
+  color: #999;
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.stat-box {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.stat-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+/* Admin Dashboard */
+.admin-dashboard {
+  animation: slideInDown 0.5s ease;
+}
+
+/* Warden Dashboard */
+.warden-dashboard {
+  animation: slideInDown 0.5s ease;
+}
+
+/* Accountant Dashboard */
+.accountant-dashboard {
+  animation: slideInDown 0.5s ease;
+}
+
+.financial-section {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  margin-top: 40px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.view-all {
+  color: #667eea;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.view-all:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  transition: all 0.3s ease;
+}
+
+.transaction-item:hover {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  transform: translateX(4px);
+}
+
+.transaction-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.transaction-type {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.transaction-date {
+  font-size: 12px;
+  color: #999;
+}
+
+.transaction-amount {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.transaction-amount.income {
+  color: #43e97b;
+}
+
+.transaction-amount.expense {
+  color: #fa709a;
+}
+
+/* Security Dashboard */
+.security-dashboard {
+  animation: slideInDown 0.5s ease;
+}
+
+.security-section {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  margin-top: 40px;
+}
+
+.activity-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  padding-left: 40px;
+}
+
+.activity-timeline::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  position: relative;
+}
+
+.activity-item::before {
+  content: '';
+  position: absolute;
+  left: -33px;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border: 3px solid #667eea;
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.activity-time {
+  font-size: 12px;
+  font-weight: 600;
+  color: #667eea;
+  min-width: 60px;
+}
+
+.activity-icon {
+  font-size: 16px;
+}
+
+.activity-text {
+  font-size: 14px;
+  color: #1a1a2e;
+  font-weight: 500;
+}
+
+/* Student Dashboard */
+.student-dashboard {
+  animation: slideInDown 0.5s ease;
+}
+
+.student-section {
+  margin-bottom: 40px;
+  max-width: 400px;
+}
+
+.student-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.info-card {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+  transform: translateY(-4px);
+}
+
+.info-card h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+.info-detail {
+  margin: 12px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.info-detail .label {
+  font-weight: 600;
+  color: #999;
+}
+
+.info-detail .value {
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.info-detail .value.highlight {
+  color: #fa709a;
+  font-size: 16px;
+}
+
+.pay-btn,
+.complaint-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pay-btn:hover,
+.complaint-btn:hover {
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+}
+
+.pay-btn:active,
+.complaint-btn:active {
+  transform: translateY(0);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .quick-stats {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .student-info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+
+  .greeting h1 {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-top {
+    margin-bottom: 24px;
+  }
+
+  .greeting h1 {
+    font-size: 22px;
+  }
+
+  .greeting p {
+    font-size: 14px;
+  }
+
+  .quick-stats {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .stat-box {
+    padding: 16px;
+  }
+
+  .financial-section,
+  .security-section {
+    padding: 20px;
+    margin-top: 24px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .student-info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .info-card {
+    padding: 20px;
+  }
+
+  .activity-timeline {
+    padding-left: 20px;
+  }
+
+  .activity-item::before {
+    left: -29px;
+  }
+}
+
+@media (max-width: 480px) {
+  .greeting h1 {
+    font-size: 18px;
+  }
+
+  .greeting p {
+    font-size: 12px;
+  }
+
+  .stat-text {
+    font-size: 12px;
+  }
+
+  .section-header h2 {
+    font-size: 16px;
+  }
+
+  .info-detail {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

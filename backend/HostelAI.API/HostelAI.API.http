@@ -1,0 +1,6 @@
+@HostelAI.API_HostAddress = http://localhost:5182
+
+GET {{HostelAI.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
