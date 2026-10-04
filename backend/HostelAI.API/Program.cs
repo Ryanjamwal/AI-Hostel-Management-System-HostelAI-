@@ -104,7 +104,14 @@ app.MapPost("/api/auth/login", async (LoginRequest request, HostelAiDbContext co
 
     var token = jwtService.GenerateToken(user.Id, user.Email, user.FullName, user.Role);
 
-    return Results.Ok(new AuthResponse(user.Id, user.FullName, user.Email, user.Role, token));
+    return Results.Ok(new
+    {
+        userId = user.Id,
+        fullName = user.FullName,
+        email = user.Email,
+        role = user.Role,
+        token
+    });
 });
 
 app.MapPost("/api/auth/register", async (RegisterRequest request, HostelAiDbContext context, IPasswordService passwordService) =>
@@ -845,14 +852,3 @@ public record CreateVisitorRequest(
     DateTime? CheckOutTime,
     bool Approved,
     string Purpose);
-
-public record LoginRequest(
-    string Email,
-    string Password);
-
-public record AuthResponse(
-    int Id,
-    string FullName,
-    string Email,
-    string Role,
-    string Token);

@@ -185,3 +185,4 @@ D:\New folder\project\AI Hostel Management System (HostelAI)\backend\HostelAI.AP
 D:\New folder\project\AI Hostel Management System (HostelAI)\backend\HostelAI.API\bin\Debug\net10.0\runtimes\win-x64\native\e_sqlite3.dll
 D:\New folder\project\AI Hostel Management System (HostelAI)\backend\HostelAI.API\bin\Debug\net10.0\runtimes\win-x86\native\e_sqlite3.dll
 D:\New folder\project\AI Hostel Management System (HostelAI)\backend\HostelAI.API\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\New folder\project\AI Hostel Management System (HostelAI)\backend\HostelAI.API\obj\Debug\net10.0\HostelAI.API.sourcelink.json
