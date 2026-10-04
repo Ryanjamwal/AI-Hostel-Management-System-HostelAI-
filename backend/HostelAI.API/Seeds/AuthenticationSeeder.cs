@@ -1,5 +1,6 @@
 using HostelAI.API.Data;
 using HostelAI.API.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace HostelAI.API.Seeds;
 
@@ -7,20 +8,13 @@ public static class AuthenticationSeeder
 {
     public static async Task SeedDemoUsersAsync(HostelAiDbContext context, IPasswordService passwordService)
     {
-        // Check if users already exist
-        if (context.Users.Any())
-        {
-            Console.WriteLine("Users already seeded. Skipping...");
-            return;
-        }
-
-        var demoUsers = new List<User>
+        var demoUsers = new[]
         {
             new User
             {
                 FullName = "Admin User",
                 Email = "admin@hostelai.com",
-                PasswordHash = passwordService.HashPassword("Password@123"),
+                PasswordHash = string.Empty,
                 Role = "Admin",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
@@ -29,7 +23,7 @@ public static class AuthenticationSeeder
             {
                 FullName = "Warden Davis",
                 Email = "warden@hostelai.com",
-                PasswordHash = passwordService.HashPassword("Password@123"),
+                PasswordHash = string.Empty,
                 Role = "Warden",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
@@ -38,7 +32,7 @@ public static class AuthenticationSeeder
             {
                 FullName = "Accountant Smith",
                 Email = "accountant@hostelai.com",
-                PasswordHash = passwordService.HashPassword("Password@123"),
+                PasswordHash = string.Empty,
                 Role = "Accountant",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
@@ -47,7 +41,7 @@ public static class AuthenticationSeeder
             {
                 FullName = "Security Chief",
                 Email = "security@hostelai.com",
-                PasswordHash = passwordService.HashPassword("Password@123"),
+                PasswordHash = string.Empty,
                 Role = "SecurityStaff",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
@@ -56,25 +50,46 @@ public static class AuthenticationSeeder
             {
                 FullName = "John Doe",
                 Email = "student@hostelai.com",
-                PasswordHash = passwordService.HashPassword("Password@123"),
+                PasswordHash = string.Empty,
                 Role = "Student",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             }
         };
 
-        await context.Users.AddRangeAsync(demoUsers);
-        await context.SaveChangesAsync();
-
-        Console.WriteLine("Demo users seeded successfully!");
-        Console.WriteLine("\nDemo Credentials:");
-        Console.WriteLine("==================");
-        foreach (var user in demoUsers)
+        var existingUsers = await context.Users.ToListAsync();
+        var usersByEmail = existingUsers
+            .GroupBy(user => user.Email, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+        var legacyPasswords = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            Console.WriteLine($"Role: {user.Role}");
-            Console.WriteLine($"Email: {user.Email}");
-            Console.WriteLine($"Password: Password@123");
-            Console.WriteLine("---");
+            ["admin@hostelai.com"] = "admin123",
+            ["warden@hostelai.com"] = "warden123",
+            ["accountant@hostelai.com"] = "accountant123",
+            ["security@hostelai.com"] = "security123"
+        };
+
+        foreach (var demoUser in demoUsers)
+        {
+            if (!usersByEmail.TryGetValue(demoUser.Email, out var existingUser))
+            {
+                demoUser.PasswordHash = passwordService.HashPassword("Password@123");
+                await context.Users.AddAsync(demoUser);
+                continue;
+            }
+
+            var isLegacySeedPassword = legacyPasswords.TryGetValue(demoUser.Email, out var legacyPassword)
+                && passwordService.NeedsRehash(existingUser.PasswordHash)
+                && passwordService.VerifyPassword(legacyPassword, existingUser.PasswordHash);
+            var isPlaceholderHash = existingUser.PasswordHash == "demo-hash";
+            if (isLegacySeedPassword || isPlaceholderHash)
+            {
+                existingUser.PasswordHash = passwordService.HashPassword("Password@123");
+                existingUser.Role = demoUser.Role;
+                existingUser.IsActive = true;
+            }
         }
+
+        await context.SaveChangesAsync();
     }
 }

@@ -56,14 +56,13 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Seed demo users in development
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
-    using (var scope = app.Services.CreateScope())
+    var context = scope.ServiceProvider.GetRequiredService<HostelAiDbContext>();
+    var passwordService = scope.ServiceProvider.GetRequiredService<IPasswordService>();
+    SeedData.Initialize(context, passwordService);
+    if (app.Environment.IsDevelopment())
     {
-        var context = scope.ServiceProvider.GetRequiredService<HostelAiDbContext>();
-        var passwordService = scope.ServiceProvider.GetRequiredService<IPasswordService>();
-        await context.Database.EnsureCreatedAsync();
         await AuthenticationSeeder.SeedDemoUsersAsync(context, passwordService);
     }
 }
@@ -91,27 +90,27 @@ app.MapPost("/api/auth/login", async (LoginRequest request, HostelAiDbContext co
         return Results.BadRequest(new { error = "Email and password are required." });
     }
 
-    var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+    var email = request.Email.Trim().ToLowerInvariant();
+    var user = await context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email);
     if (user is null || !passwordService.VerifyPassword(request.Password, user.PasswordHash))
     {
-        return Results.Json(new { error = "Invalid email or password. Demo password is Password@123" }, statusCode: 401);
+        return Results.Json(new { error = "Invalid email or password." }, statusCode: StatusCodes.Status401Unauthorized);
     }
 
     if (!user.IsActive)
     {
-        return Results.Json(new { error = "Account is inactive. Contact Administrator." }, statusCode: 401);
+        return Results.Json(new { error = "Invalid email or password." }, statusCode: StatusCodes.Status401Unauthorized);
+    }
+
+    if (passwordService.NeedsRehash(user.PasswordHash))
+    {
+        user.PasswordHash = passwordService.HashPassword(request.Password);
+        await context.SaveChangesAsync();
     }
 
     var token = jwtService.GenerateToken(user.Id, user.Email, user.FullName, user.Role);
 
-    return Results.Ok(new
-    {
-        userId = user.Id,
-        fullName = user.FullName,
-        email = user.Email,
-        role = user.Role,
-        token
-    });
+    return Results.Ok(new AuthResponse(user.Id, user.FullName, user.Email, user.Role, token));
 });
 
 app.MapPost("/api/auth/register", async (RegisterRequest request, HostelAiDbContext context, IPasswordService passwordService) =>
@@ -121,18 +120,24 @@ app.MapPost("/api/auth/register", async (RegisterRequest request, HostelAiDbCont
         return Results.BadRequest(new { error = "Full name, email, and password are required." });
     }
 
-    var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+    if (request.Password.Length < 8)
+    {
+        return Results.BadRequest(new { error = "Password must be at least 8 characters." });
+    }
+
+    var email = request.Email.Trim().ToLowerInvariant();
+    var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email);
     if (existingUser is not null)
     {
-        return Results.BadRequest(new { error = "A user with this email already exists." });
+        return Results.Conflict(new { error = "A user with this email already exists." });
     }
 
     var user = new User
     {
-        FullName = request.FullName,
-        Email = request.Email,
+        FullName = request.FullName.Trim(),
+        Email = email,
         PasswordHash = passwordService.HashPassword(request.Password),
-        Role = request.Role ?? "Student",
+        Role = "Student",
         IsActive = true
     };
 
@@ -677,12 +682,6 @@ app.MapDelete("/api/complaints/{id:int}", async (int id, HostelAiDbContext conte
     await context.SaveChangesAsync();
     return Results.NoContent();
 });
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<HostelAiDbContext>();
-    SeedData.Initialize(db);
-}
 
 app.Run();
 

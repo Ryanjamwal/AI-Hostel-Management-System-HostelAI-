@@ -1,10 +1,11 @@
 using HostelAI.API.Data;
+using HostelAI.API.Services;
 
 namespace HostelAI.API.Data;
 
 public static class SeedData
 {
-    public static void Initialize(HostelAiDbContext context)
+    public static void Initialize(HostelAiDbContext context, IPasswordService passwordService)
     {
         context.Database.EnsureCreated();
 
@@ -17,7 +18,7 @@ public static class SeedData
         {
             FullName = "Admin Hostel",
             Email = "admin@hostelai.com",
-            PasswordHash = "admin123",
+            PasswordHash = passwordService.HashPassword("Password@123"),
             Role = "Admin"
         };
 
@@ -25,7 +26,7 @@ public static class SeedData
         {
             FullName = "Ayesha Khan",
             Email = "ayesha@hostelai.com",
-            PasswordHash = "student123",
+            PasswordHash = passwordService.HashPassword("Password@123"),
             Role = "Student"
         };
 
@@ -33,7 +34,7 @@ public static class SeedData
         {
             FullName = "Mina Warden",
             Email = "warden@hostelai.com",
-            PasswordHash = "warden123",
+            PasswordHash = passwordService.HashPassword("Password@123"),
             Role = "Warden"
         };
 
@@ -41,7 +42,7 @@ public static class SeedData
         {
             FullName = "Bilal Accountant",
             Email = "accountant@hostelai.com",
-            PasswordHash = "accountant123",
+            PasswordHash = passwordService.HashPassword("Password@123"),
             Role = "Accountant"
         };
 
@@ -49,8 +50,8 @@ public static class SeedData
         {
             FullName = "Haris Security",
             Email = "security@hostelai.com",
-            PasswordHash = "security123",
-            Role = "Security"
+            PasswordHash = passwordService.HashPassword("Password@123"),
+            Role = "SecurityStaff"
         };
 
         context.Users.AddRange(admin, student, warden, accountant, security);

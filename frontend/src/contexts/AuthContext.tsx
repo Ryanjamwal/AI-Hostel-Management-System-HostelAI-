@@ -1,10 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+
+export type UserRole = 'Student' | 'Admin' | 'Warden' | 'Accountant' | 'SecurityStaff';
 
 export interface User {
   userId: number;
   email: string;
   fullName: string;
-  role: 'Student' | 'Admin' | 'Warden' | 'Accountant' | 'SecurityStaff';
+  role: UserRole;
 }
 
 export interface AuthContextType {
@@ -17,157 +19,153 @@ export interface AuthContextType {
   register: (fullName: string, email: string, password: string, role?: string) => Promise<void>;
 }
 
-const demoAccounts: Record<string, { role: User['role']; name: string }> = {
-  'admin@hostelai.com': { role: 'Admin', name: 'System Admin' },
-  'warden@hostelai.com': { role: 'Warden', name: 'Head Warden' },
-  'accountant@hostelai.com': { role: 'Accountant', name: 'Chief Accountant' },
-  'security@hostelai.com': { role: 'SecurityStaff', name: 'Security Supervisor' },
-  'student@hostelai.com': { role: 'Student', name: 'Aarav Sharma' },
-};
+interface AuthResponse {
+  userId?: number | string;
+  id?: number | string;
+  email?: string;
+  fullName?: string;
+  role?: string;
+  token?: string;
+}
+
+const apiBaseUrl = 'http://localhost:5000/api';
+const validRoles: UserRole[] = ['Student', 'Admin', 'Warden', 'Accountant', 'SecurityStaff'];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const parseUser = (data: AuthResponse): User => {
+  const userId = Number(data.userId ?? data.id);
+  if (
+    !Number.isInteger(userId)
+    || userId <= 0
+    || !data.email
+    || !data.fullName
+    || !data.role
+    || !validRoles.includes(data.role as UserRole)
+  ) {
+    throw new Error('The server returned an invalid user profile.');
+  }
+
+  return {
+    userId,
+    email: data.email,
+    fullName: data.fullName,
+    role: data.role as UserRole,
+  };
+};
+
+const readError = async (response: Response): Promise<string> => {
+  try {
+    const body = await response.json() as { error?: string; message?: string };
+    return body.error || body.message || `Request failed (${response.status}).`;
+  } catch {
+    return `Request failed (${response.status}).`;
+  }
+};
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize auth state from localStorage with seamless fallback on refresh
   useEffect(() => {
-    const storedToken = localStorage.getItem('authToken');
-    const storedUser = localStorage.getItem('user');
+    let isMounted = true;
 
-    if (storedToken && storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        if (parsedUser && parsedUser.email) {
-          setToken(storedToken);
-          setUser(parsedUser);
-          setIsLoading(false);
-          return;
-        }
-      } catch (e) {
-        console.error('Failed to parse stored user in AuthContext', e);
+    const restoreSession = async () => {
+      const storedToken = localStorage.getItem('authToken');
+      if (!storedToken) {
+        localStorage.removeItem('user');
+        if (isMounted) setIsLoading(false);
+        return;
       }
-    }
 
-    // Seamless default initialization on refresh if storage was empty
-    const defaultAdmin: User = {
-      userId: 1,
-      email: 'admin@hostelai.com',
-      fullName: 'System Admin',
-      role: 'Admin',
+      try {
+        const response = await fetch(`${apiBaseUrl}/auth/me`, {
+          headers: { Authorization: `Bearer ${storedToken}` },
+        });
+        if (!response.ok) {
+          throw new Error('Your session has expired. Please sign in again.');
+        }
+
+        const userData = parseUser(await response.json() as AuthResponse);
+        if (isMounted) {
+          setToken(storedToken);
+          setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
+        }
+      } catch (error) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        if (isMounted) {
+          setToken(null);
+          setUser(null);
+        }
+        if (error instanceof TypeError) {
+          console.error('Unable to validate the saved HostelAI session because the API is unavailable.', error);
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
     };
-    const defaultToken = 'DEMO-ADMIN-PERSISTENT-TOKEN';
-    setToken(defaultToken);
-    setUser(defaultAdmin);
-    localStorage.setItem('authToken', defaultToken);
-    localStorage.setItem('user', JSON.stringify(defaultAdmin));
-    setIsLoading(false);
+
+    void restoreSession();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
-    const cleanEmail = email.trim().toLowerCase();
-
     try {
-      let response: Response | null = null;
+      let response: Response;
       try {
-        response = await fetch('http://localhost:5000/api/auth/login', {
+        response = await fetch(`${apiBaseUrl}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: cleanEmail, password }),
+          body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
         });
-      } catch {
-        response = null; // Backend offline
+      } catch (error) {
+        throw new Error('Unable to connect to the HostelAI API. Make sure the backend is running.', { cause: error });
       }
 
-      // If backend is online and returns 200 OK
-      if (response && response.ok) {
-        const data = await response.json();
-        const userData: User = {
-          userId: data.userId || data.id || 1,
-          email: data.email || cleanEmail,
-          fullName: data.fullName || 'User',
-          role: data.role || 'Admin',
-        };
-
-        setToken(data.token);
-        setUser(userData);
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('user', JSON.stringify(userData));
-        return;
+      if (!response.ok) {
+        throw new Error(await readError(response));
       }
 
-      // Fallback for Demo Accounts (works even if backend returns 401 or is offline)
-      const demo = demoAccounts[cleanEmail];
-      if (demo) {
-        const fallbackData: User = {
-          userId: 1,
-          email: cleanEmail,
-          fullName: demo.name,
-          role: demo.role,
-        };
-        const mockToken = `DEMO-JWT-TOKEN-${Date.now()}`;
-        setToken(mockToken);
-        setUser(fallbackData);
-        localStorage.setItem('authToken', mockToken);
-        localStorage.setItem('user', JSON.stringify(fallbackData));
-        return;
+      const data = await response.json() as AuthResponse;
+      if (!data.token) {
+        throw new Error('The server did not return an authentication token.');
       }
 
-      // Non-demo email that failed backend auth
-      let errText = 'Invalid email or password';
-      if (response) {
-        try {
-          const errData = await response.json();
-          errText = errData.error || errData.message || 'Login failed';
-        } catch {
-          errText = response.statusText;
-        }
-      }
-      throw new Error(errText);
+      const userData = parseUser(data);
+      setToken(data.token);
+      setUser(userData);
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('user', JSON.stringify(userData));
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (fullName: string, email: string, password: string, role?: string) => {
+  const register = async (fullName: string, email: string, password: string) => {
     setIsLoading(true);
     try {
-      let response: Response | null = null;
+      let response: Response;
       try {
-        response = await fetch('http://localhost:5000/api/auth/register', {
+        response = await fetch(`${apiBaseUrl}/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fullName,
-            email,
-            password,
-            role: role || 'Student',
-          }),
+          body: JSON.stringify({ fullName, email: email.trim().toLowerCase(), password }),
         });
-      } catch {
-        response = null;
+      } catch (error) {
+        throw new Error('Unable to connect to the HostelAI API. Make sure the backend is running.', { cause: error });
       }
 
-      if (response && response.ok) {
-        await login(email, password);
-        return;
+      if (!response.ok) {
+        throw new Error(await readError(response));
       }
 
-      // Fallback demo registration
-      const fallbackUser: User = {
-        userId: Date.now(),
-        email,
-        fullName,
-        role: (role as User['role']) || 'Student',
-      };
-      const mockToken = `DEMO-REGISTER-TOKEN-${Date.now()}`;
-      setToken(mockToken);
-      setUser(fallbackUser);
-      localStorage.setItem('authToken', mockToken);
-      localStorage.setItem('user', JSON.stringify(fallbackUser));
+      await login(email, password);
     } finally {
       setIsLoading(false);
     }
@@ -197,6 +195,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
